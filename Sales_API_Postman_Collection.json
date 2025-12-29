@@ -1,0 +1,866 @@
+{
+    "info": {
+        "_postman_id": "sales-api-collection",
+        "name": "BOS - Sales API",
+        "description": "Complete API collection for testing the Sales module including authentication, customers, bills, and payments",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{access_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "refresh_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "customer_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "bill_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "payment_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "product_id",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Login (Get Token)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('access_token', jsonData.access);",
+                                    "    pm.collectionVariables.set('refresh_token', jsonData.refresh);",
+                                    "    console.log('Access token saved:', jsonData.access);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"tenant@example.com\",\n    \"password\": \"your_password\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/token/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "token",
+                                ""
+                            ]
+                        },
+                        "description": "Login with tenant credentials to get access and refresh tokens"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('access_token', jsonData.access);",
+                                    "    if (jsonData.refresh) {",
+                                    "        pm.collectionVariables.set('refresh_token', jsonData.refresh);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/token/refresh/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "token",
+                                "refresh",
+                                ""
+                            ]
+                        },
+                        "description": "Refresh the access token using refresh token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/logout/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout",
+                                ""
+                            ]
+                        },
+                        "description": "Logout and blacklist the refresh token"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Customers",
+            "item": [
+                {
+                    "name": "List All Customers",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/customers/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "customers",
+                                ""
+                            ]
+                        },
+                        "description": "Get list of all customers for the authenticated tenant"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Customer",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('customer_id', jsonData.customer_id);",
+                                    "    console.log('Customer ID saved:', jsonData.customer_id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"John Doe\",\n    \"phone\": \"+91-9876543210\",\n    \"email\": \"john.doe@example.com\",\n    \"gst_number\": \"29ABCDE1234F1Z5\",\n    \"type\": \"Regular\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/customers/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "customers",
+                                ""
+                            ]
+                        },
+                        "description": "Create a new customer"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Customer Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/customers/{{customer_id}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "customers",
+                                "{{customer_id}}",
+                                ""
+                            ]
+                        },
+                        "description": "Get details of a specific customer"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Customer",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"John Doe Updated\",\n    \"phone\": \"+91-9876543210\",\n    \"email\": \"john.updated@example.com\",\n    \"gst_number\": \"29ABCDE1234F1Z5\",\n    \"type\": \"Premium\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/customers/{{customer_id}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "customers",
+                                "{{customer_id}}",
+                                ""
+                            ]
+                        },
+                        "description": "Update customer details"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Partial Update Customer",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"VIP\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/customers/{{customer_id}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "customers",
+                                "{{customer_id}}",
+                                ""
+                            ]
+                        },
+                        "description": "Partially update customer details"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Customer",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/customers/{{customer_id}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "customers",
+                                "{{customer_id}}",
+                                ""
+                            ]
+                        },
+                        "description": "Delete a customer"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Bills",
+            "item": [
+                {
+                    "name": "List All Bills",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/bills/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "bills",
+                                ""
+                            ]
+                        },
+                        "description": "Get list of all bills for the authenticated tenant"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Bill (Cash Sale)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('bill_id', jsonData.bill_id);",
+                                    "    console.log('Bill ID saved:', jsonData.bill_id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customer_id\": {{customer_id}},\n    \"bill_discount\": 50.00,\n    \"payment_type\": \"CASH\",\n    \"items\": [\n        {\n            \"product_id\": {{product_id}},\n            \"quantity\": 2,\n            \"price\": 500.00,\n            \"discount\": 10.00\n        },\n        {\n            \"product_id\": {{product_id}},\n            \"quantity\": 1,\n            \"price\": 300.00,\n            \"discount\": 0\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/bills/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "bills",
+                                ""
+                            ]
+                        },
+                        "description": "Create a new bill with cash payment"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Bill (Credit Sale)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('bill_id', jsonData.bill_id);",
+                                    "    console.log('Bill ID saved:', jsonData.bill_id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customer_id\": {{customer_id}},\n    \"bill_discount\": 0,\n    \"payment_type\": \"CREDIT\",\n    \"items\": [\n        {\n            \"product_id\": {{product_id}},\n            \"quantity\": 5,\n            \"price\": 1000.00,\n            \"discount\": 50.00\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/bills/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "bills",
+                                ""
+                            ]
+                        },
+                        "description": "Create a new bill with credit payment (increases customer spending balance)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Bill (Without Customer)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"bill_discount\": 0,\n    \"payment_type\": \"CASH\",\n    \"items\": [\n        {\n            \"product_id\": {{product_id}},\n            \"quantity\": 1,\n            \"price\": 250.00,\n            \"discount\": 0\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/bills/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "bills",
+                                ""
+                            ]
+                        },
+                        "description": "Create a bill without linking to a customer (walk-in customer)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Bill Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/bills/{{bill_id}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "bills",
+                                "{{bill_id}}",
+                                ""
+                            ]
+                        },
+                        "description": "Get details of a specific bill including all items"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Payments",
+            "item": [
+                {
+                    "name": "List All Payments",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/payments/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "payments",
+                                ""
+                            ]
+                        },
+                        "description": "Get list of all customer payments"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Payment (Customer Paying)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('payment_id', jsonData.payment_id);",
+                                    "    console.log('Payment ID saved:', jsonData.payment_id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customer\": {{customer_id}},\n    \"amount\": 1000.00,\n    \"type\": \"CREDIT\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/payments/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "payments",
+                                ""
+                            ]
+                        },
+                        "description": "Record a payment from customer (reduces spending balance)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Payment (Debit)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customer\": {{customer_id}},\n    \"amount\": 500.00,\n    \"type\": \"DEBIT\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/payments/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "payments",
+                                ""
+                            ]
+                        },
+                        "description": "Record a debit payment (increases spending balance)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Payment Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/payments/{{payment_id}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "payments",
+                                "{{payment_id}}",
+                                ""
+                            ]
+                        },
+                        "description": "Get details of a specific payment"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Payment",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customer\": {{customer_id}},\n    \"amount\": 1200.00,\n    \"type\": \"CREDIT\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/payments/{{payment_id}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "payments",
+                                "{{payment_id}}",
+                                ""
+                            ]
+                        },
+                        "description": "Update payment details"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Payment",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/payments/{{payment_id}}/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "payments",
+                                "{{payment_id}}",
+                                ""
+                            ]
+                        },
+                        "description": "Delete a payment record"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Error Scenarios",
+            "item": [
+                {
+                    "name": "Create Bill - Insufficient Stock",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customer_id\": {{customer_id}},\n    \"payment_type\": \"CASH\",\n    \"items\": [\n        {\n            \"product_id\": {{product_id}},\n            \"quantity\": 999999,\n            \"price\": 100.00\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/bills/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "bills",
+                                ""
+                            ]
+                        },
+                        "description": "Test insufficient stock error handling"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Payment - Negative Amount",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customer\": {{customer_id}},\n    \"amount\": -100.00,\n    \"type\": \"CREDIT\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/payments/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "payments",
+                                ""
+                            ]
+                        },
+                        "description": "Test validation for negative payment amount (should fail)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Payment - Zero Amount",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"customer\": {{customer_id}},\n    \"amount\": 0,\n    \"type\": \"CREDIT\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/payments/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "payments",
+                                ""
+                            ]
+                        },
+                        "description": "Test validation for zero payment amount (should fail)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Bill - Invalid Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"payment_type\": \"CASH\",\n    \"items\": [\n        {\n            \"product_id\": 999999,\n            \"quantity\": 1,\n            \"price\": 100.00\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/bills/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "bills",
+                                ""
+                            ]
+                        },
+                        "description": "Test error handling for non-existent product"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Bill - No Items",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"payment_type\": \"CASH\",\n    \"items\": []\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sales/bills/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sales",
+                                "bills",
+                                ""
+                            ]
+                        },
+                        "description": "Test validation for bill with no items (should fail)"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

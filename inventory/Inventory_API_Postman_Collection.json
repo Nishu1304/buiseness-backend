@@ -1,0 +1,247 @@
+{
+  "info": {
+    "_postman_id": "inventory-api-suite-optimized",
+    "name": "Inventory API - Optimized Test Suite",
+    "description": "Optimized fully automated collection for testing authentication, categories, products, stock, and images.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "category_id", "value": "" },
+    { "key": "product_id", "value": "" },
+    { "key": "movement_id", "value": "" }
+  ],
+
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login (Get Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login should return 200', () => pm.response.to.have.status(200));",
+                  "let json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.access || '');",
+                  "pm.collectionVariables.set('refresh_token', json.refresh || '');",
+                  "pm.test('Access token must exist', () => pm.expect(json.access).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tenant@example.com\",\n  \"password\": \"your_password\"\n}"
+            },
+            "url": "{{base_url}}/api/token/"
+          }
+        },
+
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Refresh should return 200', () => pm.response.to.have.status(200));",
+                  "let json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.access || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"refresh\": \"{{refresh_token}}\" }" },
+            "url": "{{base_url}}/api/token/refresh/"
+          }
+        },
+
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"refresh\": \"{{refresh_token}}\" }" },
+            "url": "{{base_url}}/api/auth/logout/"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Category created (201)', () => pm.response.to.have.status(201));",
+                  "let json = pm.response.json();",
+                  "pm.collectionVariables.set('category_id', json.category_id || '');",
+                  "pm.test('Category ID saved', () => pm.expect(json.category_id).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Electronics\", \"description\": \"Electronic gadgets\", \"status\": \"active\" }"
+            },
+            "url": "{{base_url}}/api/inventory/categories/"
+          }
+        },
+
+        {
+          "name": "Get Category by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Category should load (200)', () => pm.response.to.have.status(200));"] }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{base_url}}/api/inventory/categories/{{category_id}}/" }
+        },
+
+        {
+          "name": "Update Category (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"description\": \"Updated description\" }" },
+            "url": "{{base_url}}/api/inventory/categories/{{category_id}}/"
+          }
+        },
+
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/inventory/categories/{{category_id}}/"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Product created (201)', () => pm.response.to.have.status(201));",
+                  "let json = pm.response.json();",
+                  "pm.collectionVariables.set('product_id', json.product_id || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"sku\": \"IPH15-PRO-256\",\n  \"brand\": \"Apple\",\n  \"category\": \"{{category_id}}\",\n  \"purchase_price\": \"95000\",\n  \"selling_price\": \"134900\",\n  \"status\": \"active\"\n}"
+            },
+            "url": "{{base_url}}/api/inventory/products/"
+          }
+        },
+
+        {
+          "name": "Get Product",
+          "request": { "method": "GET", "url": "{{base_url}}/api/inventory/products/{{product_id}}/" }
+        },
+
+        {
+          "name": "Delete Product",
+          "request": { "method": "DELETE", "url": "{{base_url}}/api/inventory/products/{{product_id}}/" }
+        }
+      ]
+    },
+
+    {
+      "name": "Stock Management",
+      "item": [
+        {
+          "name": "Add Stock",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"quantity\": 50, \"reason\": \"Initial stock\" }" },
+            "url": "{{base_url}}/api/inventory/products/{{product_id}}/add-stock/"
+          }
+        },
+
+        {
+          "name": "Remove Stock",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"quantity\": 5, \"reason\": \"Damaged\" }" },
+            "url": "{{base_url}}/api/inventory/products/{{product_id}}/remove-stock/"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Stock Movements",
+      "item": [
+        {
+          "name": "List Movements",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length > 0) {",
+                  "  pm.collectionVariables.set('movement_id', json[0].movement_id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{base_url}}/api/inventory/stock-movements/" }
+        },
+
+        {
+          "name": "Get Movement by ID",
+          "request": { "method": "GET", "url": "{{base_url}}/api/inventory/stock-movements/{{movement_id}}/" }
+        }
+      ]
+    }
+  ]
+}
