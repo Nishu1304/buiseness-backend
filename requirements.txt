@@ -1,0 +1,23 @@
+Django>=4.2,<5.0
+
+# Server
+gunicorn
+
+# Static files
+whitenoise
+
+# Database
+psycopg2-binary
+dj-database-url
+
+# REST API
+djangorestframework
+
+# CORS
+django-cors-headers
+
+# Auth / JWT (optional but common)
+djangorestframework-simplejwt
+
+# Environment variables
+python-dotenv
