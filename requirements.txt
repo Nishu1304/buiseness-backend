@@ -21,3 +21,4 @@ djangorestframework-simplejwt
 
 # Environment variables
 python-dotenv
+django-filter
